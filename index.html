@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>GCC Atlas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#fff;--card:#F4F1EA;--tx:#1B1F3B;--mut:#6B7280;--ac:#E8590C;--ln:#D9D4C7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14162b;--card:#1f2340;--tx:#F4F1EA;--mut:#9aa0b4;--ln:#343a63}}
+:root[data-theme="dark"]{--bg:#14162b;--card:#1f2340;--tx:#F4F1EA;--mut:#9aa0b4;--ln:#343a63}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 Calibri,system-ui,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:16px}h1{font:700 26px Georgia,serif;margin:0}h1 span{color:var(--ac)}
+.sub{color:var(--mut);margin:4px 0 14px}nav{display:flex;gap:6px;margin-bottom:14px}
+nav button,.chip{border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:99px;font:inherit;cursor:pointer}
+nav button.on,.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+input,select,textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:8px;max-width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.row input{flex:1;min-width:140px}
+.card{background:var(--card);border-radius:10px;padding:12px;margin-bottom:8px}.card b{font-size:16px}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--ln);color:var(--mut);margin-right:4px}
+a{color:var(--ac)}.src a{font-size:12px;margin-right:6px}.sc{overflow-x:auto}
+table{border-collapse:collapse;min-width:640px;width:100%}th,td{border:1px solid var(--ln);padding:8px;vertical-align:top;font-size:13px;text-align:left}
+th{background:var(--card)}td.ns{color:var(--mut);font-style:italic}
+textarea{width:100%;min-height:70px}.btn{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;cursor:pointer;margin-top:8px}
+#ans{white-space:pre-wrap;margin-top:12px}.note{font-size:12px;color:var(--mut);margin-top:16px}
+</style></head><body><div class="w">
+<h1>GCC <span>Atlas</span></h1><p class="sub">Sourced, not sponsored. Every fact links to where it came from.</p>
+<nav id="nav"><button data-t="dir" class="on">Directory</button><button data-t="cmp">Compare cities</button><button data-t="ask">Ask Atlas</button></nav>
+<section id="dir"><div class="row"><input id="q" placeholder="Search company or city"><select id="fc"><option value="">All cities</option></select><select id="fs"><option value="">All statuses</option></select></div><div id="list"></div></section>
+<section id="cmp" hidden><div class="row" id="chips"></div><div class="sc"><table id="tbl"></table></div></section>
+<section id="ask" hidden><div class="card">Describe your GCC plan. Answers use only the sourced data in this page and say so when it is not enough.</div>
+<textarea id="qa" placeholder="I'm a 300-person fintech GCC. Which city should I pick?"></textarea><br><button class="btn" id="go">Ask Atlas</button><div id="ans"></div></section>
+<p class="note"><b>Data status:</b> early prototype, seeded from public reports and news (links shown). Office rent and talent cost are not yet sourced, so they show as gaps rather than guesses. Where sources disagree, both figures are shown. Several entries come from secondary roundups and are tagged "secondary".</p>
+</div><script>
+const SRC={S1:["Zinnov-Nasscom GCC Landscape 2026","https://zinnov.com/centers-of-excellence/zinnov-nasscom-india-gcc-landscape-2026-report/"],
+S2:["CBRE, The Policy Advantage (via CXOToday)","https://cxotoday.com/others/state-policies-target-over-1-1-million-gcc-jobs-by-2031-cbre-report/"],
+S3:["Law.asia, states race to become GCC powerhouses","https://law.asia/india-gcc-growth/"],
+S4:["Mondaq, choosing a location for your GCC (Jul 2026)","https://www.mondaq.com/choosing-the-right-location-in-india-for-your-gcc/1819112"],
+S5:["Newsorbit, GCC growth 2026","https://newsorbit.it.com/?p=2442"],
+S6:["GCC Voices roundup, Jan-Feb 2026","https://www.aniisu.com/wp-content/uploads/2026/02/GCC-Voices-Monthly-Roundup-January-February-2026.pdf"],
+S7:["Sights in Plus, major GCC announcements 2026","https://www.sightsinplus.com/editorial/major-gcc-announcements-in-2026-set-to-create-thousands-of-jobs-in-india/"],
+S8:["Verified Real Estate, GCC evolution H1 2026","https://community.verified.realestate/article/the-evolution-of-indias-gccs-from-cost-centres-to-global-engineering-powerhouses/?amp=1"],
+S9:["Hyderabad GCC roundup (secondary, social post)","https://in.linkedin.com/in/ovya-rk"],
+S10:["Flexiple GCC statistics","https://flexiple.com/gcc/statistics"],
+S11:["ANSR city counts (secondary, social post)","https://in.linkedin.com/in/skatish"],
+S12:["Nasscom-Zinnov FY24 via ThePrint","https://theprint.in/economy/indias-position-as-gcc-capital-of-the-world-nasscom-zinnov-study/2268673/"]};
+const GCC=[["Abercrombie & Fitch","Bengaluru","Opened","Aug 2026","S5"],["N-able","Bengaluru","Launched","2026","S7"],["PwC (Connected Cybersecurity Solutions Centre)","Bengaluru","Launched","2026","S7"],
+["Heineken","Hyderabad","Launched","29 Apr 2026","S9"],["JLL","Hyderabad","Inaugurated","6 Aug 2026","S9"],["L'Oréal","Hyderabad","Planned","Nov 2026","S9"],["Vanguard","Hyderabad","Opened","3 Nov 2025","S9"],
+["Nestlé (with Genpact)","Hyderabad","Announced","Jun 2026","S7"],["CIBC","Hyderabad","Launched","Mid 2026","S9"],["LPL Financial","Hyderabad","Announced","Jan-Feb 2026","S6"],["Providence","Hyderabad","Inaugurated","Early 2026","S6"],["BASF","Hyderabad","Announced","Jan-Feb 2026","S6"],["Unilever","Hyderabad","Evaluating","Jan-Feb 2026","S6"],
+["Apple","Chennai","Facility leased","Jan-Feb 2026","S6"],["UPS (Phase 3)","Chennai","Opened","May 2026","S8"],["Ford","Coimbatore","Opened","Jul 2026","S8"],["Syngenta","Pune","Expanded","Jan-Feb 2026","S6"]];
+const CITY={Bengaluru:{n:["~870 GCCs, ~40% of India's base","S11"],p:["Karnataka GCC Policy 2024-29: 500 new GCCs, 3.5 lakh jobs; extra incentives for Mysuru and Mangaluru","S3,S2"],m:["Largest market. Counts conflict: 500+ GCCs (state govt) vs 875+ units (law-firm note)","S10,S4"]},
+Hyderabad:{n:["~550 GCCs","S11"],p:["Telangana framework: target 120 new GCCs by 2026; land, electricity and employment-linked support","S3"],m:["Fastest-growing cluster, many 2026 launches (see Directory)","S9"]},
+Pune:{n:["360+ GCCs","S11"],p:["Maharashtra GCC Policy 2025: target 200 GCCs and 4 lakh jobs (CBRE) vs 400 GCCs (Law.asia)","S2,S3"],m:["One report calls Pune the second-largest GCC city by H1 2026 leasing","S8"]},
+Chennai:{n:["300+ GCCs","S11"],p:["No standalone policy. Land cost incentive up to 50% (up to 8 ha), IP filing reimbursement, electricity tax exemption, training stipends","S3"],m:["Space is tight; rents rose over 5% in H1 2026","S8"]},
+"Delhi NCR":{n:null,p:["Haryana GCC Policy 2025; Uttar Pradesh via Invest UP","S3"],m:["Bengaluru and NCR held 47% of IT talent in India's GCCs (FY24 report)","S12"]}};
+const ROWS=[["GCCs in city","n"],["State policy and incentives","p"],["Market notes","m"],["Office rent",null],["Talent cost",null]];
+const $=i=>document.getElementById(i);
+const tags=s=>s.split(",").map(k=>`<a href="${SRC[k][1]}" target="_blank" rel="noopener" title="${SRC[k][0]}">[${k}]</a>`).join(" ");
+function dir(){const q=$("q").value.toLowerCase(),c=$("fc").value,s=$("fs").value;
+$("list").innerHTML=GCC.filter(g=>(!c||g[1]==c)&&(!s||g[2]==s)&&(g[0]+g[1]).toLowerCase().includes(q)).map(g=>`<div class="card"><b>${g[0]}</b> <span class="tag">${g[1]}</span><span class="tag">${g[2]}</span><span class="tag">${g[3]}</span><div class="src">Source: ${tags(g[4])} ${SRC[g[4]][0]}</div></div>`).join("")||"<p>No matches.</p>"}
+[...new Set(GCC.map(g=>g[1]))].forEach(c=>$("fc").add(new Option(c,c)));[...new Set(GCC.map(g=>g[2]))].forEach(c=>$("fs").add(new Option(c,c)));
+["q","fc","fs"].forEach(i=>$(i).oninput=dir);dir();
+let sel=new Set(["Bengaluru","Hyderabad","Pune"]);
+function cmp(){$("chips").innerHTML=Object.keys(CITY).map(c=>`<button class="chip ${sel.has(c)?"on":""}" data-c="${c}">${c}</button>`).join("");
+document.querySelectorAll("#chips .chip").forEach(b=>b.onclick=()=>{sel.has(b.dataset.c)?sel.delete(b.dataset.c):sel.add(b.dataset.c);cmp()});
+const cs=Object.keys(CITY).filter(c=>sel.has(c));
+$("tbl").innerHTML="<tr><th></th>"+cs.map(c=>`<th>${c}</th>`).join("")+"</tr>"+ROWS.map(r=>"<tr><th>"+r[0]+"</th>"+cs.map(c=>{const v=r[1]&&CITY[c][r[1]];return v?`<td>${v[0]} ${tags(v[1])}</td>`:`<td class="ns">Not yet sourced</td>`}).join("")+"</tr>").join("")}
+cmp();
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x==b));["dir","cmp","ask"].forEach(t=>$(t).hidden=t!=b.dataset.t)});
+$("go").onclick=async()=>{const q=$("qa").value.trim();if(!q)return;const a=$("ans");a.textContent="Thinking...";
+let sample=null;try{sample=await claude.use("sample")}catch(e){}
+if(!sample){const ql=q.toLowerCase();let cs=Object.keys(CITY).filter(c=>ql.includes(c.toLowerCase().split(" ")[0]));if(!cs.length)cs=["Bengaluru","Hyderabad","Pune"];
+const f=ql.match(/incentiv|polic|subsid|land/)?["p","m"]:["n","p","m"];
+a.innerHTML="<b>Basic mode (no AI).</b> Sourced facts for "+cs.join(", ")+":<br><br>"+cs.map(c=>"<b>"+c+"</b><br>"+f.map(k=>CITY[c][k]?"- "+CITY[c][k][0]+" "+tags(CITY[c][k][1]):"- GCC count not yet sourced").join("<br>")).join("<br><br>")+"<br><br><i>Rent and talent cost are not yet sourced, so no recommendation is made. AI answers are available when this page is opened inside Claude.</i>";return}
+const data=JSON.stringify({sources:Object.fromEntries(Object.entries(SRC).map(([k,v])=>[k,v[0]])),cities:CITY,rows:GCC});
+const prompt=`You are Atlas, an adviser for companies choosing where to set up a Global Capability Centre in India. Use ONLY the data below. Cite every claim with source ids like [S3]. If the data cannot answer something (rent, talent cost, anything missing), say plainly that it is not in the data yet. Where sources conflict, state both. Give a short comparison of the 2-3 most relevant cities, then a tentative recommendation and what to verify next. Under 220 words.\n\nDATA:\n${data}\n\nQUESTION: ${q}`;
+try{const r=await sample(prompt,{cache:false,onText:t=>{a.textContent=t.text}});a.textContent=r.text}catch(e){a.textContent=e&&e.code=="not_granted"?"Permission was declined, so the assistant is off.":"Could not get an answer right now. Please try again."}};
+</script></body></html>
